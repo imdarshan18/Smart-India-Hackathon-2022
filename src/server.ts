@@ -11,7 +11,6 @@ import cookieParser from "cookie-parser";
 import RestErrors from "./utils/rest_errors";
 import DB from "./utils/database";
 // import AuthMiddleware from "./middlewares/auth_middleware";
-
 // importing routes
 import AuthRoutes from "./routes/auth_routes";
 import AdminRoutes from "./routes/admin_routes";
