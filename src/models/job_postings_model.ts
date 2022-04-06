@@ -21,7 +21,6 @@ class JobPostings extends Model {
 
 JobPostings.init(
     {
-        id: DataTypes.BIGINT,
         postingType: { type: DataTypes.STRING, field: 'posting_type' },
         domain: DataTypes.STRING,
         jobDescription: { type: DataTypes.STRING, field: 'job_description' },
@@ -38,7 +37,7 @@ JobPostings.init(
     {
         underscored: true,
         sequelize: DB.sequelize,
-        modelName: "users",
+        modelName: "jobPostings",
     }
 )
 

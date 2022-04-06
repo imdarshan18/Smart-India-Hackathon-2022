@@ -2,45 +2,43 @@ import RestResponse, { IRestResponse } from "../utils/rest_response";
 import RestErrors, { IRestError } from "../utils/rest_errors";
 import { IResultAndError } from "../interfaces/result_and_error";
 import { Request, Response } from 'express';
-import Candidates from "../models/candidate_model";
 import { bodyValidator } from "../helpers/static_functions";
+import JobPostings from "../models/job_postings_model";
 
-const createCandidateFields = ["firstName", "lastName", "email", "password", "college", "organization", "experience", "country", "state", "city"];
-const candidateAttributes = ["firstName", "lastName", "email", "password", "college", "organization", "experience", "country", "state", "city"];
+const createJobPostingFields = ["postingType", "domain", "jobDescription", "companyName", "country", "state", "city", "requiredExperience", "requiredSkills"];
+const JobPostingAttributes = ["postingType", "domain", "jobDescription", "companyName", "country", "state", "city", "requiredExperience", "requiredSkills", "salary"];
 
-class CandidatesController {
-    public static async createCandidate(req: Request, res: Response) {
+class JobPostingsController {
+    public static async createJobPosting(req: Request, res: Response) {
         try {
-            const { firstName, lastName, email, password, college, organization, experience, country, state, city, dateOfBirth } = req.body;
+            const { postingType, domain, jobDescription, companyName, country, state, city, requiredExperience, requiredSkills } = req.body;
 
-            if(!bodyValidator(req.body, createCandidateFields)) {
+            if(!bodyValidator(req.body, createJobPostingFields)) {
                 const er = RestErrors.newBadRequestError("Invalid valid input");
                 res.status(er.status);
                 res.json(er);
                 return;
             }
 
-            const newCandidate = await Candidates.create({
-                firstName,
-                lastName,
-                email,
-                password,
-                college,
-                organization,
-                experience,
+            const newJobPosting = await JobPostings.create({
+                postingType,
+                domain,
+                jobDescription,
+                companyName,
                 country,
                 state,
                 city,
-                dateOfBirth
+                requiredExperience,
+                requiredSkills
             })
 
             const r = RestResponse.newResponse({
-                data: newCandidate
+                data: newJobPosting
             });
             res.status(r.status);
             res.json(r);
         } catch (err) {
-            console.log("CandidateController.getAll() error::", err);
+            console.log("JobPostingController.getAll() error::", err);
             const er = RestErrors.newinternalServerError("Something went wrong");
             res.status(er.status);
             res.json(er);
@@ -48,28 +46,28 @@ class CandidatesController {
         }
     }
 
-    public static async getAllCandidate(req: Request, res: Response) {
+    public static async getAllJobPostings(req: Request, res: Response) {
         try {
             const { skip=0, limit=50 }: any = req.query;
 
-            const allCandidates = await Candidates.findAll({
+            const allJobPostings = await JobPostings.findAll({
                 limit: parseInt(limit),
                 offset: parseInt(skip),
                 order: [['created_at', 'DESC']]
             });
 
-            const resCount = await Candidates.count({
+            const resCount = await JobPostings.count({
                 distinct: true,
                 col: 'id'
             });
 
             const r = RestResponse.newResponse({
-                data: { response: allCandidates, count: resCount}
+                data: { response: allJobPostings, count: resCount}
             });
             res.status(r.status);
             res.json(r);
         } catch (err) {
-            console.log("CandidatesController.getAll() error::", err);
+            console.log("JobPostingsController.getAll() error::", err);
             const er = RestErrors.newinternalServerError("Something went wrong");
             res.status(er.status);
             res.json(er);
@@ -77,7 +75,7 @@ class CandidatesController {
         }
     }
 
-    public static async getOneCandidate(req: Request, res: Response) {
+    public static async getOneJobPosting(req: Request, res: Response) {
         try {
             const { id } = req.params;
 
@@ -88,24 +86,24 @@ class CandidatesController {
                 return;
             }
 
-            const candidate: any = await Candidates.findOne({
+            const jobPosting: any = await JobPostings.findOne({
                 where: { id }
             });
 
-            if(!candidate) {
-                const er = RestErrors.newBadRequestError("Candidate does not exist");
+            if(!jobPosting) {
+                const er = RestErrors.newBadRequestError("Job Posting does not exist");
                 res.status(er.status);
                 res.json(er);
                 return;
             }
 
             const r = RestResponse.newResponse({
-                data: candidate
+                data: jobPosting
             });
             res.status(r.status);
             res.json(r)
         } catch (err) {
-            console.log("CandidatesController.getAll() error::", err);
+            console.log("JobPostingsController.getAll() error::", err);
             const er = RestErrors.newinternalServerError("Something went wrong");
             res.status(er.status);
             res.json(er);
@@ -113,12 +111,12 @@ class CandidatesController {
         }
     }
 
-    public static async updateCandidate(req: Request, res: Response) {
+    public static async updateJobPosting(req: Request, res: Response) {
         try {
             const { id } = req.params;
             const incomingRequest = req.body;
 
-            if(!incomingRequest || !bodyValidator(incomingRequest, candidateAttributes)) {
+            if(!incomingRequest || !bodyValidator(incomingRequest, JobPostingAttributes)) {
                 const er = RestErrors.newBadRequestError("Enter valid input");
                 res.status(er.status);
                 res.json(er);
@@ -132,17 +130,17 @@ class CandidatesController {
                 return;
             }
 
-            const candidate = await Candidates.findByPk(id);
+            const jobPosting = await JobPostings.findByPk(id);
 
-            if(!candidate) {
-                const er = RestErrors.newNotFoundError("Candidate does not exist");
+            if(!jobPosting) {
+                const er = RestErrors.newNotFoundError("Job Posting does not exist");
                 res.status(er.status);
                 res.json(er);
                 return;
             }
 
             const currentTime = new Date();
-            const result = await Candidates.update(
+            const result = await JobPostings.update(
                 { ...incomingRequest, updatedAt: currentTime },
                 {
                     where: { id }
@@ -169,16 +167,16 @@ class CandidatesController {
         }
     }
 
-    public static async deleteCandidate(req: Request, res: Response) {
+    public static async deleteJobPosting(req: Request, res: Response) {
         try {
             const { id } = req.params;
 
-            const file = await Candidates.findOne({
+            const file = await JobPostings.findOne({
                 where: { id },
             })
             
 
-            const deleteFile = await Candidates.destroy({
+            const deleteFile = await JobPostings.destroy({
                 where: { id },
             });
 
@@ -197,4 +195,4 @@ class CandidatesController {
     }
 }
 
-export default CandidatesController;
+export default JobPostingsController;

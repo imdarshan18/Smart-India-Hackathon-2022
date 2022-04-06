@@ -2,45 +2,40 @@ import RestResponse, { IRestResponse } from "../utils/rest_response";
 import RestErrors, { IRestError } from "../utils/rest_errors";
 import { IResultAndError } from "../interfaces/result_and_error";
 import { Request, Response } from 'express';
-import Candidates from "../models/candidate_model";
+import Application from "../models/application_model";
 import { bodyValidator } from "../helpers/static_functions";
+import Company from "../models/company_model";
 
-const createCandidateFields = ["firstName", "lastName", "email", "password", "college", "organization", "experience", "country", "state", "city"];
-const candidateAttributes = ["firstName", "lastName", "email", "password", "college", "organization", "experience", "country", "state", "city"];
+const createCompanyFields = ["companyName", "companyRegistrationId", "country", "state", "city"];
+const companyAttributes = ["companyName", "companyRegistrationId", "country", "state", "city"];
 
-class CandidatesController {
-    public static async createCandidate(req: Request, res: Response) {
+class CompanyController {
+    public static async createCompany(req: Request, res: Response) {
         try {
-            const { firstName, lastName, email, password, college, organization, experience, country, state, city, dateOfBirth } = req.body;
+            const { companyName, companyRegistrationId, country, state, city } = req.body;
 
-            if(!bodyValidator(req.body, createCandidateFields)) {
-                const er = RestErrors.newBadRequestError("Invalid valid input");
+            if(!bodyValidator(req.body, createCompanyFields)) {
+                const er = RestErrors.newBadRequestError("Invalid input");
                 res.status(er.status);
                 res.json(er);
                 return;
             }
 
-            const newCandidate = await Candidates.create({
-                firstName,
-                lastName,
-                email,
-                password,
-                college,
-                organization,
-                experience,
+            const newCompany = await Company.create({
+                companyName,
+                companyRegistrationId,
                 country,
                 state,
-                city,
-                dateOfBirth
+                city
             })
 
             const r = RestResponse.newResponse({
-                data: newCandidate
+                data: newCompany
             });
             res.status(r.status);
             res.json(r);
         } catch (err) {
-            console.log("CandidateController.getAll() error::", err);
+            console.log("CompanyController.getAll() error::", err);
             const er = RestErrors.newinternalServerError("Something went wrong");
             res.status(er.status);
             res.json(er);
@@ -48,28 +43,28 @@ class CandidatesController {
         }
     }
 
-    public static async getAllCandidate(req: Request, res: Response) {
+    public static async getAllCompanies(req: Request, res: Response) {
         try {
             const { skip=0, limit=50 }: any = req.query;
 
-            const allCandidates = await Candidates.findAll({
+            const allCompany = await Company.findAll({
                 limit: parseInt(limit),
                 offset: parseInt(skip),
                 order: [['created_at', 'DESC']]
             });
 
-            const resCount = await Candidates.count({
+            const resCount = await Company.count({
                 distinct: true,
                 col: 'id'
             });
 
             const r = RestResponse.newResponse({
-                data: { response: allCandidates, count: resCount}
+                data: { response: allCompany, count: resCount}
             });
             res.status(r.status);
             res.json(r);
         } catch (err) {
-            console.log("CandidatesController.getAll() error::", err);
+            console.log("CompanyController.getAll() error::", err);
             const er = RestErrors.newinternalServerError("Something went wrong");
             res.status(er.status);
             res.json(er);
@@ -77,7 +72,7 @@ class CandidatesController {
         }
     }
 
-    public static async getOneCandidate(req: Request, res: Response) {
+    public static async getOneCompany(req: Request, res: Response) {
         try {
             const { id } = req.params;
 
@@ -88,24 +83,24 @@ class CandidatesController {
                 return;
             }
 
-            const candidate: any = await Candidates.findOne({
+            const company: any = await Company.findOne({
                 where: { id }
             });
 
-            if(!candidate) {
-                const er = RestErrors.newBadRequestError("Candidate does not exist");
+            if(!company) {
+                const er = RestErrors.newBadRequestError("Company does not exist");
                 res.status(er.status);
                 res.json(er);
                 return;
             }
 
             const r = RestResponse.newResponse({
-                data: candidate
+                data: company
             });
             res.status(r.status);
             res.json(r)
         } catch (err) {
-            console.log("CandidatesController.getAll() error::", err);
+            console.log("CompanyController.getAll() error::", err);
             const er = RestErrors.newinternalServerError("Something went wrong");
             res.status(er.status);
             res.json(er);
@@ -113,12 +108,12 @@ class CandidatesController {
         }
     }
 
-    public static async updateCandidate(req: Request, res: Response) {
+    public static async updateCompany(req: Request, res: Response) {
         try {
             const { id } = req.params;
             const incomingRequest = req.body;
 
-            if(!incomingRequest || !bodyValidator(incomingRequest, candidateAttributes)) {
+            if(!incomingRequest || !bodyValidator(incomingRequest, companyAttributes)) {
                 const er = RestErrors.newBadRequestError("Enter valid input");
                 res.status(er.status);
                 res.json(er);
@@ -132,17 +127,17 @@ class CandidatesController {
                 return;
             }
 
-            const candidate = await Candidates.findByPk(id);
+            const company = await Company.findByPk(id);
 
-            if(!candidate) {
-                const er = RestErrors.newNotFoundError("Candidate does not exist");
+            if(!company) {
+                const er = RestErrors.newNotFoundError("Company does not exist");
                 res.status(er.status);
                 res.json(er);
                 return;
             }
 
             const currentTime = new Date();
-            const result = await Candidates.update(
+            const result = await Company.update(
                 { ...incomingRequest, updatedAt: currentTime },
                 {
                     where: { id }
@@ -169,16 +164,16 @@ class CandidatesController {
         }
     }
 
-    public static async deleteCandidate(req: Request, res: Response) {
+    public static async deleteCompany(req: Request, res: Response) {
         try {
             const { id } = req.params;
 
-            const file = await Candidates.findOne({
+            const file = await Company.findOne({
                 where: { id },
             })
             
 
-            const deleteFile = await Candidates.destroy({
+            const deleteFile = await Company.destroy({
                 where: { id },
             });
 
@@ -197,4 +192,4 @@ class CandidatesController {
     }
 }
 
-export default CandidatesController;
+export default CompanyController;

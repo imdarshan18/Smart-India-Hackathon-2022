@@ -2,45 +2,37 @@ import RestResponse, { IRestResponse } from "../utils/rest_response";
 import RestErrors, { IRestError } from "../utils/rest_errors";
 import { IResultAndError } from "../interfaces/result_and_error";
 import { Request, Response } from 'express';
-import Candidates from "../models/candidate_model";
+import Application from "../models/application_model";
 import { bodyValidator } from "../helpers/static_functions";
+import Applications from "../models/application_model";
 
-const createCandidateFields = ["firstName", "lastName", "email", "password", "college", "organization", "experience", "country", "state", "city"];
-const candidateAttributes = ["firstName", "lastName", "email", "password", "college", "organization", "experience", "country", "state", "city"];
+const createApplicationFields = ["candidateName", "organization"];
+const applicationAttributes = ["candidateName", "organization"];
 
-class CandidatesController {
+class ApplicationsController {
     public static async createCandidate(req: Request, res: Response) {
         try {
-            const { firstName, lastName, email, password, college, organization, experience, country, state, city, dateOfBirth } = req.body;
+            const { candidateName, organization } = req.body;
 
-            if(!bodyValidator(req.body, createCandidateFields)) {
+            if(!bodyValidator(req.body, createApplicationFields)) {
                 const er = RestErrors.newBadRequestError("Invalid valid input");
                 res.status(er.status);
                 res.json(er);
                 return;
             }
 
-            const newCandidate = await Candidates.create({
-                firstName,
-                lastName,
-                email,
-                password,
-                college,
-                organization,
-                experience,
-                country,
-                state,
-                city,
-                dateOfBirth
+            const newApplication = await Applications.create({
+                candidateName,
+                organization
             })
 
             const r = RestResponse.newResponse({
-                data: newCandidate
+                data: newApplication
             });
             res.status(r.status);
             res.json(r);
         } catch (err) {
-            console.log("CandidateController.getAll() error::", err);
+            console.log("ApplicationController.getAll() error::", err);
             const er = RestErrors.newinternalServerError("Something went wrong");
             res.status(er.status);
             res.json(er);
@@ -48,28 +40,28 @@ class CandidatesController {
         }
     }
 
-    public static async getAllCandidate(req: Request, res: Response) {
+    public static async getAllapplications(req: Request, res: Response) {
         try {
             const { skip=0, limit=50 }: any = req.query;
 
-            const allCandidates = await Candidates.findAll({
+            const allApplications = await Applications.findAll({
                 limit: parseInt(limit),
                 offset: parseInt(skip),
                 order: [['created_at', 'DESC']]
             });
 
-            const resCount = await Candidates.count({
+            const resCount = await Applications.count({
                 distinct: true,
                 col: 'id'
             });
 
             const r = RestResponse.newResponse({
-                data: { response: allCandidates, count: resCount}
+                data: { response: allApplications, count: resCount}
             });
             res.status(r.status);
             res.json(r);
         } catch (err) {
-            console.log("CandidatesController.getAll() error::", err);
+            console.log("ApplicationsController.getAll() error::", err);
             const er = RestErrors.newinternalServerError("Something went wrong");
             res.status(er.status);
             res.json(er);
@@ -77,7 +69,7 @@ class CandidatesController {
         }
     }
 
-    public static async getOneCandidate(req: Request, res: Response) {
+    public static async getOneApplication(req: Request, res: Response) {
         try {
             const { id } = req.params;
 
@@ -88,24 +80,24 @@ class CandidatesController {
                 return;
             }
 
-            const candidate: any = await Candidates.findOne({
+            const application: any = await Applications.findOne({
                 where: { id }
             });
 
-            if(!candidate) {
-                const er = RestErrors.newBadRequestError("Candidate does not exist");
+            if(!application) {
+                const er = RestErrors.newBadRequestError("Application does not exist");
                 res.status(er.status);
                 res.json(er);
                 return;
             }
 
             const r = RestResponse.newResponse({
-                data: candidate
+                data: application
             });
             res.status(r.status);
             res.json(r)
         } catch (err) {
-            console.log("CandidatesController.getAll() error::", err);
+            console.log("ApplicationsController.getAll() error::", err);
             const er = RestErrors.newinternalServerError("Something went wrong");
             res.status(er.status);
             res.json(er);
@@ -113,12 +105,12 @@ class CandidatesController {
         }
     }
 
-    public static async updateCandidate(req: Request, res: Response) {
+    public static async updateApplication(req: Request, res: Response) {
         try {
             const { id } = req.params;
             const incomingRequest = req.body;
 
-            if(!incomingRequest || !bodyValidator(incomingRequest, candidateAttributes)) {
+            if(!incomingRequest || !bodyValidator(incomingRequest, applicationAttributes)) {
                 const er = RestErrors.newBadRequestError("Enter valid input");
                 res.status(er.status);
                 res.json(er);
@@ -132,17 +124,17 @@ class CandidatesController {
                 return;
             }
 
-            const candidate = await Candidates.findByPk(id);
+            const application = await Applications.findByPk(id);
 
-            if(!candidate) {
-                const er = RestErrors.newNotFoundError("Candidate does not exist");
+            if(!application) {
+                const er = RestErrors.newNotFoundError("Application does not exist");
                 res.status(er.status);
                 res.json(er);
                 return;
             }
 
             const currentTime = new Date();
-            const result = await Candidates.update(
+            const result = await Applications.update(
                 { ...incomingRequest, updatedAt: currentTime },
                 {
                     where: { id }
@@ -169,16 +161,16 @@ class CandidatesController {
         }
     }
 
-    public static async deleteCandidate(req: Request, res: Response) {
+    public static async deleteApplication(req: Request, res: Response) {
         try {
             const { id } = req.params;
 
-            const file = await Candidates.findOne({
+            const file = await Applications.findOne({
                 where: { id },
             })
             
 
-            const deleteFile = await Candidates.destroy({
+            const deleteFile = await Applications.destroy({
                 where: { id },
             });
 
@@ -197,4 +189,4 @@ class CandidatesController {
     }
 }
 
-export default CandidatesController;
+export default ApplicationsController;
