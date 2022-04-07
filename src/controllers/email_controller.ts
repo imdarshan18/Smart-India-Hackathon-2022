@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+require("dotenv").config();
 
 const user = process.env.GMAIL_USER;
 const password = process.env.GMAIL_PASSWORD
@@ -12,10 +13,10 @@ let transporter = nodemailer.createTransport({
 });
   
 let message = {
-    from: "",
-    to: "",
-    subject: "",
-    html: "<h1></h1>"
+    from: "dkubavat52@gmail.com",
+    to: "dkubavat18@gmail.com",
+    subject: "nothing",
+    html: "<h1>hello!</h1>"
 }
   
 transporter.sendMail(message, function(err: any, info: any) {

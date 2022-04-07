@@ -59,6 +59,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "ftp": "^0.3.10",
     "isomorphic-unfetch": "^3.1.0",
+    "json2csv": "^5.0.7",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.10.0",
     "mysql2": "^2.2.5",
